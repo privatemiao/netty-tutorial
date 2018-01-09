@@ -1,3 +1,4 @@
+
            ______________________________________
   ________|                                      |_______
   \       |           Netty In Action            |      /
@@ -5,3 +6,88 @@
    /      |______________________________________|     \
   /__________)                                (_________\
 
+
+ByteBuf
+    Netty 的数据容器，维护了两个不同的索引：一个用于读取，一个用于写入。
+
+    ->读取的时候，readerIndex 将会递增已经读取的字节数
+    ->写入的时候，writerIndex 也会被递增。
+
+    名称以 read 或者 write 开头的 ByteBuf 方法，将会推进其对应的索引，
+    而名称以 get 或 set 开头的方法则不会
+
+    用法：
+        1、堆缓冲区
+            ->优点：支撑数组，将数据存储在 JVM 堆空间中，分配、释放速度快。提供
+            数组的直接访问。
+            ->缺点：每次读写数据都要先讲数据拷贝到直接缓冲区再进行传递。
+        2、直接缓冲区
+            ->优点：数据直接在内存中，不存在从 JVM 中拷贝数据到直接缓冲区，性能
+            好。
+            ->缺点：由于直接在内存中，所以分配和释放内存比堆缓冲区更复杂和慢。
+        3、复制
+            ->现有缓冲区的真实副本：copy()、copy(int, int)
+
+资源管理
+    ResourceLeakDetector 帮助诊断是否有资源泄漏
+        ->采样级别
+            DISABLED:   禁用泄漏检测
+            SIMPLE:     使用 1% 的默认采样率
+            ADVANCED:   使用默认的采样率，报告所发现的任何的泄露以及对应的消息被
+                访问的位置
+            PARANOID:   类似 advanced，但是将会对每次的消息的访问都进行采样，这
+                对性能将会有很大的影响，调式阶段使用。
+
+    设置
+        java -Dio.netty.leakDetectionLevel=ADVANCED
+
+    资源释放
+        ->调用仍和实现了 ChannelHandlerAdapter 的 read 或者 write 方法，都要负
+            责手动释放 ByteBuf，ReferenceCountUtil.release(ByteBuf)
+        ->SimpleChannelInboundHandler
+            调用该方法的 read0 以后无需手动释放，系统会自动完成释放工作
+
+ChannelPipeline
+    ->一个拦截流经 Channel 的入站和出站事件的 ChannelHandler 的实例链
+    ->ChannelHandler 可以通过添加、删除或者替换其它的 ChannelHandler 来实时的修改
+        ChannelPipeline 的布局。*可以将自己从 pipeline 中删除*
+
+ChannelHandler 的执行和阻塞
+    通常 ChannelPipeline 中的每一个 ChannelHandler 都是通过它的 EventLoop 来处理
+        传递给她的事件的。所以不要阻塞这个线程，因为会对整体 I/O处理产生负面影响。
+        如果有阻塞的需求，ChannelPipeline 有一些接受一个 EventExecutorGroup 的
+        add() 方法。
+
+ChannelHandlerContext
+    代表了 ChannelHandler 和 ChannelPipeline 之间的关联。管理所关联的 ChannelHandler
+        和在同一个 ChannelPipeline 的其他 ChannelHandler 之间的交互。
+
+Bootstrap
+    ->group     设置用于处理 Channel 所有事件的 EventLoopGroup
+    ->channel   指定 Channel 的实现类
+    ->option    设置 ChannelOption，将被应用到每个新创建的 Channel 的 ChannelConfig
+    ->handler   设置将被添加到 ChannelPipeline 以接收事件通知的 ChannelHandler
+
+ServerBootstrap
+    ->group         一般为两个，一个用于 ServerChannel 的接收，另一个用于 Channel 的 I/O
+        处理
+    ->handler       设置被添加到 ServerHandler 的 ChannelPipeline 中的 ChannelHandler
+        由 ServerChannel 处理
+    ->childHandler  设置被添加到以被接受的 Channel 的 ChannelPipeline 中的 ChannleHandler
+        由被接受的子 Channel 处理，其代表了绑定了远程节点的套接字
+
+     1、当 bind 方法被调用时，将会创建一个 ServerChannel
+     2、当连接被接受时，ServerChannel 将会创建一个新的 Channel
+
+    ServerBootstrap.group(NioEventLoopGroup, NioEventLoopGroup)
+        .channel(NioServerSocketChannel.class)
+        .childHandler(new SimpleChannelInboundHandler<ByteBuf>);
+    ServerBootstrap.bind(new InetSocketAddress(PORT));
+
+ChannelInitializer
+    向 ChannelPipeline 添加多个 ChannelHandler, 一旦 Channel 被注册到 EventLoop 之后，
+        就会调用 initChannel 方法，该方法返回之后， ChannelInitializer 便会从
+        ChannelPipeline 中移除自己
+
+ChannelOption
+    ->option    该方法将 ChannelOption 应用到引导，效果将会被应用到所有 Channle。
