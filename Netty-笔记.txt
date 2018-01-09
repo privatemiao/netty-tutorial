@@ -91,3 +91,6 @@ ChannelInitializer
 
 ChannelOption
     ->option    该方法将 ChannelOption 应用到引导，效果将会被应用到所有 Channle。
+
+WebSocket
+    通信将作为普通的 HTTP 协议开始，随后升级到双向的 WebSocket 协议
