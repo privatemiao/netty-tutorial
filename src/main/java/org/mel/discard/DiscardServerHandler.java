@@ -5,7 +5,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.CharsetUtil;
 import io.netty.util.ReferenceCountUtil;
-import org.mel.BootstrapUtils;
 
 public class DiscardServerHandler extends ChannelInboundHandlerAdapter {
     final boolean SEND_BACK = true;
@@ -39,7 +38,4 @@ public class DiscardServerHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
-    public static void main(String[] args) throws Exception {
-        BootstrapUtils.startServer(new DiscardServerHandler());
-    }
 }

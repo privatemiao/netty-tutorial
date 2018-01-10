@@ -6,7 +6,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
-import org.mel.BootstrapUtils;
 
 @ChannelHandler.Sharable
 public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
@@ -28,7 +27,4 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<ByteBuf> {
         ctx.close();
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        BootstrapUtils.startClient(new EchoClientHandler());
-    }
 }

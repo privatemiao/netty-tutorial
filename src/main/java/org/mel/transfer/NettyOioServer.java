@@ -46,7 +46,4 @@ public class NettyOioServer {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        new NettyOioServer().server(9000);
-    }
 }

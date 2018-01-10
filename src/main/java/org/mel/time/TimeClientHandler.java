@@ -2,7 +2,6 @@ package org.mel.time;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.mel.BootstrapUtils;
 
 public class TimeClientHandler extends ChannelInboundHandlerAdapter {
     @Override
@@ -19,7 +18,4 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
-    public static void main(String[] args) throws InterruptedException {
-        BootstrapUtils.startClient(new TimeDecoder(), new TimeClientHandler());
-    }
 }

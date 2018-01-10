@@ -4,7 +4,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.mel.BootstrapUtils;
 
 public class TimeServerHandler extends ChannelInboundHandlerAdapter {
     /**
@@ -25,7 +24,4 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
         ctx.close();
     }
 
-    public static void main(String[] args) throws Exception {
-        BootstrapUtils.startServer(new TimeEncoder(), new TimeServerHandler());
-    }
 }

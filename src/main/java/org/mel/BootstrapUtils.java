@@ -7,10 +7,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 
 public class BootstrapUtils {
 
-    public static void startServer(final ChannelHandler... handler) throws Exception {
+    public interface HandlerCreator{
+        void doProcess(SocketChannel channel);
+    }
+
+    public static void startServer(final HandlerCreator creator) throws Exception {
         /*
          * NioEventLoopGroup: 是一个多线程的、控制输入输出流的事件循环
          * bossGroup: 接受客户端的连接，将连接注册到 workGroup
@@ -32,7 +37,7 @@ public class BootstrapUtils {
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) {
-                            ch.pipeline().addLast(handler);
+                            creator.doProcess(ch);
                         }
                     })
                     .option(ChannelOption.SO_BACKLOG, 128)
@@ -50,7 +55,10 @@ public class BootstrapUtils {
         }
     }
 
-    public static void startClient(final ChannelHandler... handler) throws InterruptedException {
+    public interface MessageSender{
+        void send(ChannelFuture f);
+    }
+    public static void startClient(final HandlerCreator creator, MessageSender sender) throws InterruptedException {
         EventLoopGroup workGroup = new NioEventLoopGroup();
 
         try {
@@ -61,10 +69,11 @@ public class BootstrapUtils {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(handler);
+                            creator.doProcess(ch);
                         }
                     });
             ChannelFuture f = b.connect("127.0.0.1", 21).sync();
+            sender.send(f);
             f.channel().closeFuture().sync();
         } finally {
             workGroup.shutdownGracefully();
