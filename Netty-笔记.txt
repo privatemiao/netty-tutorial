@@ -94,3 +94,12 @@ ChannelOption
 
 WebSocket
     通信将作为普通的 HTTP 协议开始，随后升级到双向的 WebSocket 协议
+    需要将适当的客户端或者服务端 WebSocket ChannelHandler 添加到 ChannelPipeline 中
+    ->BinaryWebSocketFrame          数据帧：二进制数据
+    ->TextWebSocketFrame            数据帧：文本数据
+    ->ContinuationWebSocketFrame    数据帧：属于上 BinaryWebSocketFrame 或者 TextWebSocketFrame
+        的文本的或者进制数据
+    CloseWebSocketFrame             控制帧：一个 CLOSE 请求一个 CLOSE 请求
+    PingWebSocketFrame              控制帧：请求一个 PongWebSocketFrame
+    PongWebSocketFrame              控制帧：对 PingWebSocketFrame 请求的响应
+
