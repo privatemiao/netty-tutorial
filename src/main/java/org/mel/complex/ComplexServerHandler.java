@@ -8,7 +8,7 @@ import io.netty.handler.codec.string.StringDecoder;
 import org.mel.BootstrapUtils;
 
 public class ComplexServerHandler extends SimpleChannelInboundHandler<String> {
-    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws InterruptedException {
+    protected void channelRead0(ChannelHandlerContext ctx, String msg) {
         System.out.print(msg);
         System.out.println(String.format("-------->处理 %s", msg));
     }
