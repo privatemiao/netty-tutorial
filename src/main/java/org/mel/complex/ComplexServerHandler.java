@@ -14,11 +14,12 @@ public class ComplexServerHandler extends SimpleChannelInboundHandler<String> {
     }
 
     public static void main(String[] args) throws Exception {
+        EventExecutorGroup workerPool = new DefaultEventExecutorGroup(10);
         BootstrapUtils.startServer(new BootstrapUtils.HandlerCreator() {
             public void doProcess(SocketChannel channel) {
                 channel.pipeline().addLast(new LineBasedFrameDecoder(Integer.MAX_VALUE));
                 channel.pipeline().addLast(new StringDecoder());
-                channel.pipeline().addLast(new ComplexServerHandler());
+                channel.pipeline().addLast(workerPool, new ComplexServerHandler());
             }
         });
     }
